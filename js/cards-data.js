@@ -12,22 +12,46 @@
  *     face.brows: -1 (сведены, злость) … 1 (подняты, грусть/удивление), 0 — ровно
  *     face.eyes:  'open' | 'wide' | 'closed' | 'half' | 'side'
  *
- * Иллюстрации вырезаны из фотографий карточек колоды «Колода эмоций».
+ * Иллюстрации вырезаны из сводного изображения колоды «Колода эмоций» (32 карточки, сетка 4×8),
+ * в исходном размере 138×172 (4:5). Порядок — как в колоде.
+ * Важно: если меняете картинку, дайте файлу новое имя — иначе у пользователей останется старая из базы.
  */
 (function () {
   'use strict';
 
   var CARDS = [
-    { id: 'boredom',    word: 'Скука',     color: '#934890', labelColor: '#C791C3', image: 'images/cards/boredom.jpg' },
-    { id: 'grief',      word: 'Горе',      color: '#30BBF5', labelColor: '#7FDCFD', image: 'images/cards/grief.jpg' },
-    { id: 'aggression', word: 'Агрессия',  color: '#FEE7E1', labelColor: '#FEC1B5', image: 'images/cards/aggression.jpg' },
-    { id: 'horror',     word: 'Ужас',      color: '#A1D301', labelColor: '#C0E249', image: 'images/cards/horror.jpg' },
-    { id: 'joy',        word: 'Радость',   color: '#FAEA00', labelColor: '#FAF26B', image: 'images/cards/joy.jpg' },
-    { id: 'anger',      word: 'Гнев',      color: '#E9005E', labelColor: '#EF6297', image: 'images/cards/anger.jpg' },
-    { id: 'surprise',   word: 'Удивление', color: '#49B34D', labelColor: '#78C77B', image: 'images/cards/surprise.jpg' },
-    { id: 'remorse',    word: 'Раскаяние', color: '#CFE6FA', labelColor: '#ACBAE3', image: 'images/cards/remorse.jpg' },
-    { id: 'amazement',  word: 'Изумление', color: '#44BA4F', labelColor: '#75CF8B', image: 'images/cards/amazement.jpg' },
-    { id: 'acceptance', word: 'Принятие',  color: '#D4E201', labelColor: '#E2ED48', image: 'images/cards/acceptance.jpg' }
+    { id: 'aggression', word: 'Агрессия', color: '#FAE4E0', labelColor: '#F6CCC1', image: 'images/cards/aggression.jpg' },
+    { id: 'ecstasy', word: 'Восторг', color: '#F4EB26', labelColor: '#FAF48A', image: 'images/cards/ecstasy.jpg' },
+    { id: 'admiration', word: 'Восхищение', color: '#CFDD24', labelColor: '#E4EC75', image: 'images/cards/admiration.jpg' },
+    { id: 'serenity', word: 'Безмятежность', color: '#F8F06A', labelColor: '#F9F5A7', image: 'images/cards/serenity.jpg' },
+    { id: 'grief', word: 'Горе', color: '#41BDEC', labelColor: '#9DDEF4', image: 'images/cards/grief.jpg' },
+    { id: 'trust', word: 'Доверие', color: '#D8E256', labelColor: '#EBF1A6', image: 'images/cards/trust.jpg' },
+    { id: 'discontent', word: 'Недовольство', color: '#953F97', labelColor: '#E7A6E5', image: 'images/cards/discontent.jpg' },
+    { id: 'excitement', word: 'Возбуждение', color: '#86C99C', labelColor: '#B8E4C7', image: 'images/cards/excitement.jpg' },
+    { id: 'annoyance', word: 'Досада', color: '#E45894', labelColor: '#F1A3C4', image: 'images/cards/annoyance.jpg' },
+    { id: 'love', word: 'Любовь', color: '#F7FAD9', labelColor: '#E6E8A5', image: 'images/cards/love.jpg' },
+    { id: 'horror', word: 'Ужас', color: '#A1CD3F', labelColor: '#BFE078', image: 'images/cards/horror.jpg' },
+    { id: 'disappointment', word: 'Разочарование', color: '#E4F2F1', labelColor: '#B8E0E0', image: 'images/cards/disappointment.jpg' },
+    { id: 'fear', word: 'Страх', color: '#A3CC3F', labelColor: '#C6E383', image: 'images/cards/fear.jpg' },
+    { id: 'anxiety', word: 'Тревога', color: '#B5D566', labelColor: '#CBE395', image: 'images/cards/anxiety.jpg' },
+    { id: 'contempt', word: 'Презрение', color: '#EFDAE8', labelColor: '#E6BEDB', image: 'images/cards/contempt.jpg' },
+    { id: 'joy', word: 'Радость', color: '#F6EA24', labelColor: '#F6F297', image: 'images/cards/joy.jpg' },
+    { id: 'boredom', word: 'Скука', color: '#A664A8', labelColor: '#D5AFD5', image: 'images/cards/boredom.jpg' },
+    { id: 'awe', word: 'Трепет', color: '#86C99D', labelColor: '#B8DFC4', image: 'images/cards/awe.jpg' },
+    { id: 'disgust', word: 'Отвращение', color: '#954098', labelColor: '#D2ABCC', image: 'images/cards/disgust.jpg' },
+    { id: 'optimism', word: 'Оптимизм', color: '#FDF6D8', labelColor: '#F5E4A6', image: 'images/cards/optimism.jpg' },
+    { id: 'sadness', word: 'Грусть', color: '#43BDEC', labelColor: '#6FCEF4', image: 'images/cards/sadness.jpg' },
+    { id: 'fury', word: 'Злость', color: '#DE0B80', labelColor: '#EF85C4', image: 'images/cards/fury.jpg' },
+    { id: 'interest', word: 'Интерес', color: '#FCB64C', labelColor: '#FECC7E', image: 'images/cards/interest.jpg' },
+    { id: 'amazement', word: 'Изумление', color: '#61BE86', labelColor: '#91D0AB', image: 'images/cards/amazement.jpg' },
+    { id: 'vigilance', word: 'Настороженность', color: '#F9A617', labelColor: '#FFC763', image: 'images/cards/vigilance.jpg' },
+    { id: 'sorrow', word: 'Печаль', color: '#41BDEC', labelColor: '#81D4F5', image: 'images/cards/sorrow.jpg' },
+    { id: 'anger', word: 'Гнев', color: '#DF0A80', labelColor: '#EC8AC2', image: 'images/cards/anger.jpg' },
+    { id: 'remorse', word: 'Раскаяние', color: '#E4E4EF', labelColor: '#C8CCEA', image: 'images/cards/remorse.jpg' },
+    { id: 'surprise', word: 'Удивление', color: '#63BE86', labelColor: '#8BD0A5', image: 'images/cards/surprise.jpg' },
+    { id: 'anticipation', word: 'Ожидание', color: '#F8A617', labelColor: '#FDCB78', image: 'images/cards/anticipation.jpg' },
+    { id: 'submission', word: 'Покорность', color: '#F1F5E0', labelColor: '#DEE7BD', image: 'images/cards/submission.jpg' },
+    { id: 'acceptance', word: 'Принятие', color: '#D7E356', labelColor: '#EBF08C', image: 'images/cards/acceptance.jpg' }
   ];
 
   /* ---------- Встроенная SVG-иллюстрация ---------- */

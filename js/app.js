@@ -78,6 +78,7 @@
     var word = document.createElement('span');
     word.className = 'card-word';
     word.textContent = card.word;
+    word.style.setProperty('--len', card.word.length);
     el.appendChild(word);
 
     if (where === 'board') {
