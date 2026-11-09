@@ -448,6 +448,18 @@
   document.getElementById('btn-csv').addEventListener('click', exportCsv);
   document.getElementById('btn-json').addEventListener('click', exportJson);
 
+  // Переключатель положения ленты (логика — в js/layout.js)
+  var stripBtn = document.getElementById('btn-strip');
+  stripBtn.addEventListener('click', function () { window.StripLayout.toggle(); });
+  window.StripLayout.onChange(function (mode) {
+    var label = mode === 'top'
+      ? 'Лента сверху. Нажмите, чтобы переместить ленту влево'
+      : 'Лента слева. Нажмите, чтобы переместить ленту наверх';
+    stripBtn.title = label;
+    stripBtn.setAttribute('aria-label', label);
+    deckEl.setAttribute('aria-orientation', mode === 'top' ? 'horizontal' : 'vertical');
+  });
+
   /* ---------- Офлайн-режим ---------- */
 
   var netBadge = document.getElementById('net-status');

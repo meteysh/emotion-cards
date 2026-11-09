@@ -21,6 +21,7 @@ var PRECACHE = [
   './',
   'index.html',
   'css/styles.css' + Q,
+  'js/layout.js' + Q,
   'js/cards-data.js' + Q,
   'js/db.js' + Q,
   'js/drag.js' + Q,
