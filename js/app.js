@@ -94,11 +94,6 @@
       el.appendChild(close);
       el.setAttribute('aria-label', (position + 1) + '. ' + card.word +
         '. Стрелки влево/вправо — переместить, Delete — вернуть в список');
-    } else if (isTaken(card.id)) {
-      el.classList.add('taken');
-      el.setAttribute('aria-disabled', 'true');
-      el.setAttribute('aria-label', card.word + ' — уже выбрана');
-      el.tabIndex = -1;
     } else {
       el.setAttribute('aria-label', card.word + '. Enter — добавить в выбранные');
     }
@@ -106,8 +101,16 @@
   }
 
   function renderDeck() {
+    // Взятые карточки в ленте не показываются; вернули — появляется на своём прежнем месте.
     var frag = document.createDocumentFragment();
-    cards.forEach(function (c) { frag.appendChild(cardNode(c, 'deck')); });
+    var available = cards.filter(function (c) { return !isTaken(c.id); });
+    available.forEach(function (c) { frag.appendChild(cardNode(c, 'deck')); });
+    if (!available.length) {
+      var empty = document.createElement('p');
+      empty.className = 'deck-empty';
+      empty.textContent = 'Все карточки в раскладке';
+      frag.appendChild(empty);
+    }
     deckEl.replaceChildren(frag);
     deckCountEl.textContent = 'доступно ' + (cards.length - board.length) + ' из ' + cards.length;
   }
@@ -282,7 +285,6 @@
   new window.DragManager({
     root: document.querySelector('.layout'),
     itemSelector: '.card[data-id]',
-    canDrag: function (el) { return !el.classList.contains('taken'); },
     // Прокручиваем только поле выбранных (для расстановки), иначе по пути к нему
     // на телефоне сдвигался бы сам список.
     canAutoScroll: function (zone) { return zone === boardEl; },
@@ -313,16 +315,28 @@
 
   deckEl.addEventListener('dblclick', function (e) {
     var el = e.target.closest('.card');
-    if (el && !el.classList.contains('taken')) addToBoard(el.dataset.id);
+    if (el) addToBoard(el.dataset.id);
   });
+
+  // Горизонтальная лента на ПК: обычное колесо мыши листает её вбок.
+  deckEl.addEventListener('wheel', function (e) {
+    var horizontal = deckEl.scrollWidth > deckEl.clientWidth && deckEl.scrollHeight <= deckEl.clientHeight;
+    if (!horizontal || e.ctrlKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+    var max = deckEl.scrollWidth - deckEl.clientWidth;
+    var atEdge = (e.deltaY < 0 && deckEl.scrollLeft <= 0) || (e.deltaY > 0 && deckEl.scrollLeft >= max - 1);
+    if (atEdge) return; // на краю ленты колесо снова прокручивает страницу
+    e.preventDefault();
+    var step = e.deltaMode === 1 ? e.deltaY * 40 : e.deltaY; // строки → пиксели
+    deckEl.scrollLeft += step;
+  }, { passive: false });
 
   deckEl.addEventListener('keydown', function (e) {
     var el = e.target.closest('.card');
-    if (!el || el.classList.contains('taken')) return;
+    if (!el) return;
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      var next = el.nextElementSibling;
-      while (next && next.classList.contains('taken')) next = next.nextElementSibling;
+      // после добавления фокус — на соседнюю карточку ленты
+      var next = el.nextElementSibling || el.previousElementSibling;
       var nextId = next && next.dataset.id;
       addToBoard(el.dataset.id);
       if (nextId) focusCard(deckEl, nextId);
