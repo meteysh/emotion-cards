@@ -10,6 +10,7 @@
   var boardCountEl = document.getElementById('board-count');
   var storageInfoEl = document.getElementById('storage-info');
   var toastEl = document.getElementById('toast');
+  var boardEmptyEl = boardEl.querySelector('.board-empty');
 
   var cards = [];          // все карточки в исходном порядке
   var byId = {};
@@ -87,7 +88,6 @@
       close.className = 'card-remove';
       close.title = 'Вернуть в список';
       close.setAttribute('aria-label', 'Вернуть «' + card.word + '» в список');
-      close.textContent = '×';
       el.appendChild(close);
       el.setAttribute('aria-label', (position + 1) + '. ' + card.word +
         '. Стрелки влево/вправо — переместить, Delete — вернуть в список');
@@ -111,6 +111,7 @@
 
   function renderBoard() {
     var frag = document.createDocumentFragment();
+    frag.appendChild(boardEmptyEl);
     board.forEach(function (id, i) {
       if (byId[id]) frag.appendChild(cardNode(byId[id], 'board', i));
     });
@@ -279,6 +280,9 @@
     root: document.querySelector('.layout'),
     itemSelector: '.card[data-id]',
     canDrag: function (el) { return !el.classList.contains('taken'); },
+    // Прокручиваем только поле выбранных (для расстановки), иначе по пути к нему
+    // на телефоне сдвигался бы сам список.
+    canAutoScroll: function (zone) { return zone === boardEl; },
     onOver: function (info) {
       var from = info.el.dataset.where;
       var zone = info.zone ? info.zone.dataset.zone : null;

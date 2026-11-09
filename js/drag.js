@@ -9,6 +9,7 @@
  *     root:      элемент, внутри которого ловим pointerdown,
  *     itemSelector: '.card[data-id]',
  *     canDrag(el)         -> boolean,
+ *     canAutoScroll(zone, el) -> boolean — прокручивать ли зону, когда карточку держат у её края,
  *     onOver(info)        -> вызывается при движении: { el, zone, x, y }
  *     onDrop(info)        -> { el, zone, x, y }   zone — элемент с data-zone или null
  *     onCancel(info)
@@ -28,7 +29,13 @@
     this._onUp = this._onUp.bind(this);
     this._onCancel = this._onCancel.bind(this);
     this._blockTouch = this._blockTouch.bind(this);
+    this._tick = this._tick.bind(this);
     opts.root.addEventListener('pointerdown', this._onDown);
+    // Долгое нажатие на Android/iOS вызывает контекстное меню — во время перетаскивания оно не нужно.
+    var self = this;
+    opts.root.addEventListener('contextmenu', function (e) {
+      if (self.state || e.target.closest(opts.itemSelector)) e.preventDefault();
+    });
     // Пока тянем пальцем — запрещаем прокрутку страницы.
     document.addEventListener('touchmove', this._blockTouch, { passive: false });
   }
@@ -95,6 +102,23 @@
     if (navigator.vibrate && s.isTouch) { try { navigator.vibrate(15); } catch (e) { /* ignore */ } }
     this._position();
     this._over();
+    s.raf = requestAnimationFrame(this._tick);
+  };
+
+  // Автопрокрутка панели, пока карточку держат у её верхнего/нижнего края.
+  DragManager.prototype._tick = function () {
+    var s = this.state;
+    if (!s || !s.dragging) return;
+    var zone = this._zoneAt(s.x, s.y);
+    if (zone && (!this.opts.canAutoScroll || this.opts.canAutoScroll(zone, s.el))) {
+      var r = zone.getBoundingClientRect();
+      var edge = Math.min(60, r.height / 4);
+      var before = zone.scrollTop;
+      if (s.y < r.top + edge) zone.scrollTop -= Math.ceil((r.top + edge - s.y) / 4);
+      else if (s.y > r.bottom - edge) zone.scrollTop += Math.ceil((s.y - (r.bottom - edge)) / 4);
+      if (zone.scrollTop !== before && this.opts.onOver) this.opts.onOver(this._info());
+    }
+    s.raf = requestAnimationFrame(this._tick);
   };
 
   DragManager.prototype._position = function () {
@@ -114,17 +138,7 @@
   };
 
   DragManager.prototype._over = function () {
-    var info = this._info();
-    this._autoScroll(info.zone);
-    if (this.opts.onOver) this.opts.onOver(info);
-  };
-
-  DragManager.prototype._autoScroll = function (zone) {
-    if (!zone) return;
-    var r = zone.getBoundingClientRect();
-    var edge = 40, y = this.state.y;
-    if (y < r.top + edge) zone.scrollTop -= 12;
-    else if (y > r.bottom - edge) zone.scrollTop += 12;
+    if (this.opts.onOver) this.opts.onOver(this._info());
   };
 
   DragManager.prototype._onMove = function (e) {
@@ -176,6 +190,7 @@
     var s = this.state;
     if (!s) return;
     clearTimeout(s.timer);
+    cancelAnimationFrame(s.raf);
     if (s.ghost) s.ghost.remove();
     s.el.classList.remove('is-dragging');
     document.body.classList.remove('dragging-active');

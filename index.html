@@ -2,18 +2,22 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f4f1ec">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
   <title>Карточки эмоций</title>
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+  <div class="app">
   <header class="topbar">
     <h1>Карточки эмоций</h1>
     <div class="actions">
       <button id="btn-save" class="btn primary" type="button">Сохранить</button>
       <button id="btn-reset" class="btn" type="button">Сбросить</button>
-      <button id="btn-csv" class="btn" type="button">Экспорт CSV</button>
-      <button id="btn-json" class="btn ghost" type="button">Экспорт JSON</button>
+      <button id="btn-csv" class="btn" type="button"><span class="long">Экспорт </span>CSV</button>
+      <button id="btn-json" class="btn ghost" type="button"><span class="long">Экспорт </span>JSON</button>
     </div>
   </header>
 
@@ -32,11 +36,14 @@
         <span id="board-count" class="muted"></span>
       </div>
       <div id="board" class="board" data-zone="board" role="list">
-        <p class="board-empty">Перетащите сюда карточки из списка слева.<br>
-          Порядок можно менять перетаскиванием.</p>
+        <p class="board-empty">
+          <span class="hint-mouse">Перетащите сюда карточки из списка.</span>
+          <span class="hint-touch">Удерживайте карточку и перетащите её сюда.</span>
+          <br>Порядок можно менять перетаскиванием.</p>
       </div>
     </section>
   </main>
+  </div>
 
   <section class="panel history-panel" aria-labelledby="history-title">
     <div class="panel-head">
