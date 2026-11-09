@@ -1,53 +1,33 @@
 /*
  * Набор карточек.
  *
- * Чтобы добавить карточку — допишите объект в массив CARDS.
- *   id     — уникальный и неизменный идентификатор (по нему хранятся сохранения).
- *   word   — слово-эмоция.
- *   color  — фоновый цвет карточки.
- *   image  — (необязательно) путь к картинке, например 'images/joy.png'.
- *            Если не указан, рисуется встроенная SVG-иллюстрация по параметрам face.
- *   face   — параметры встроенной иллюстрации:
- *            mouth: -1 (грустный) … 1 (улыбка), 'o' — открытый рот, 'flat' — прямая линия, 'wave' — волнистый
- *            brows: -1 (сведены, злость) … 1 (подняты, грусть/удивление), 0 — ровно
- *            eyes:  'open' | 'wide' | 'closed' | 'half' | 'side'
+ * Чтобы добавить карточку — положите картинку в images/cards/ и допишите объект в массив CARDS.
+ *   id          — уникальный и неизменный идентификатор (по нему хранятся сохранения).
+ *   word        — слово-эмоция.
+ *   color       — основной цвет карточки (верхняя и нижняя полосы, экспорт в CSV).
+ *   labelColor  — (необязательно) цвет средней полосы со словом; по умолчанию — светлее color.
+ *   image       — путь к иллюстрации (верхняя часть карточки, без полосы со словом).
+ *                 Если не указан, рисуется встроенная SVG-иллюстрация по параметрам face:
+ *     face.mouth: -1 (грустный) … 1 (улыбка), 'o' — открытый рот, 'flat' — прямая, 'wave' — волнистый
+ *     face.brows: -1 (сведены, злость) … 1 (подняты, грусть/удивление), 0 — ровно
+ *     face.eyes:  'open' | 'wide' | 'closed' | 'half' | 'side'
+ *
+ * Иллюстрации вырезаны из фотографий карточек колоды «Колода эмоций».
  */
 (function () {
   'use strict';
 
   var CARDS = [
-    { id: 'joy',          word: 'Радость',        color: '#FFD54F', face: { mouth: 1,      brows: 0.3,  eyes: 'open' } },
-    { id: 'sadness',      word: 'Грусть',         color: '#90CAF9', face: { mouth: -0.8,   brows: 1,    eyes: 'half' } },
-    { id: 'anxiety',      word: 'Тревога',        color: '#CE93D8', face: { mouth: 'wave', brows: 0.8,  eyes: 'wide' } },
-    { id: 'rage',         word: 'Ярость',         color: '#E53935', face: { mouth: -1,     brows: -1,   eyes: 'open' } },
-    { id: 'fear',         word: 'Страх',          color: '#B0BEC5', face: { mouth: 'o',    brows: 1,    eyes: 'wide' } },
-    { id: 'surprise',     word: 'Удивление',      color: '#FFF176', face: { mouth: 'o',    brows: 0.9,  eyes: 'wide' } },
-    { id: 'disgust',      word: 'Отвращение',     color: '#AED581', face: { mouth: 'wave', brows: -0.6, eyes: 'half' } },
-    { id: 'shame',        word: 'Стыд',           color: '#F48FB1', face: { mouth: -0.4,   brows: 0.6,  eyes: 'side' } },
-    { id: 'guilt',        word: 'Вина',           color: '#BCAAA4', face: { mouth: -0.5,   brows: 0.8,  eyes: 'half' } },
-    { id: 'pride',        word: 'Гордость',       color: '#FFB74D', face: { mouth: 0.6,    brows: -0.2, eyes: 'closed' } },
-    { id: 'tenderness',   word: 'Нежность',       color: '#F8BBD0', face: { mouth: 0.6,    brows: 0.4,  eyes: 'closed' } },
-    { id: 'calm',         word: 'Спокойствие',    color: '#80CBC4', face: { mouth: 0.3,    brows: 0,    eyes: 'closed' } },
-    { id: 'boredom',      word: 'Скука',          color: '#CFD8DC', face: { mouth: 'flat', brows: 0,    eyes: 'half' } },
-    { id: 'envy',         word: 'Зависть',        color: '#9CCC65', face: { mouth: -0.3,   brows: -0.5, eyes: 'side' } },
-    { id: 'jealousy',     word: 'Ревность',       color: '#7CB342', face: { mouth: -0.6,   brows: -0.8, eyes: 'side' } },
-    { id: 'resentment',   word: 'Обида',          color: '#9FA8DA', face: { mouth: -0.7,   brows: 0.5,  eyes: 'side' } },
-    { id: 'disappoint',   word: 'Разочарование',  color: '#A1887F', face: { mouth: -0.6,   brows: 0.7,  eyes: 'half' } },
-    { id: 'hope',         word: 'Надежда',        color: '#B2EBF2', face: { mouth: 0.4,    brows: 0.6,  eyes: 'open' } },
-    { id: 'gratitude',    word: 'Благодарность',  color: '#FFE082', face: { mouth: 0.8,    brows: 0.4,  eyes: 'closed' } },
-    { id: 'delight',      word: 'Восторг',        color: '#FF8A65', face: { mouth: 'o',    brows: 0.6,  eyes: 'closed' } },
-    { id: 'loneliness',   word: 'Одиночество',    color: '#7986CB', face: { mouth: -0.5,   brows: 0.6,  eyes: 'side' } },
-    { id: 'confusion',    word: 'Растерянность',  color: '#E1BEE7', face: { mouth: 'wave', brows: 0.5,  eyes: 'open' } },
-    { id: 'irritation',   word: 'Раздражение',    color: '#FF7043', face: { mouth: 'flat', brows: -0.8, eyes: 'half' } },
-    { id: 'apathy',       word: 'Апатия',         color: '#BDBDBD', face: { mouth: 'flat', brows: 0,    eyes: 'closed' } },
-    { id: 'curiosity',    word: 'Любопытство',    color: '#4FC3F7', face: { mouth: 0.3,    brows: 0.7,  eyes: 'wide' } },
-    { id: 'embarrass',    word: 'Смущение',       color: '#F06292', face: { mouth: 0.2,    brows: 0.6,  eyes: 'side' } },
-    { id: 'relief',       word: 'Облегчение',     color: '#A5D6A7', face: { mouth: 0.5,    brows: 0.5,  eyes: 'closed' } },
-    { id: 'inspiration',  word: 'Вдохновение',    color: '#FFCA28', face: { mouth: 0.9,    brows: 0.5,  eyes: 'wide' } },
-    { id: 'fatigue',      word: 'Усталость',      color: '#B39DDB', face: { mouth: -0.2,   brows: 0.3,  eyes: 'half' } },
-    { id: 'helpless',     word: 'Беспомощность',  color: '#90A4AE', face: { mouth: -0.9,   brows: 1,    eyes: 'wide' } },
-    { id: 'contempt',     word: 'Презрение',      color: '#8D6E63', face: { mouth: 'wave', brows: -0.4, eyes: 'side' } },
-    { id: 'impatience',   word: 'Нетерпение',     color: '#FFA726', face: { mouth: 'flat', brows: -0.5, eyes: 'wide' } }
+    { id: 'boredom',    word: 'Скука',     color: '#934890', labelColor: '#C791C3', image: 'images/cards/boredom.jpg' },
+    { id: 'grief',      word: 'Горе',      color: '#30BBF5', labelColor: '#7FDCFD', image: 'images/cards/grief.jpg' },
+    { id: 'aggression', word: 'Агрессия',  color: '#FEE7E1', labelColor: '#FEC1B5', image: 'images/cards/aggression.jpg' },
+    { id: 'horror',     word: 'Ужас',      color: '#A1D301', labelColor: '#C0E249', image: 'images/cards/horror.jpg' },
+    { id: 'joy',        word: 'Радость',   color: '#FAEA00', labelColor: '#FAF26B', image: 'images/cards/joy.jpg' },
+    { id: 'anger',      word: 'Гнев',      color: '#E9005E', labelColor: '#EF6297', image: 'images/cards/anger.jpg' },
+    { id: 'surprise',   word: 'Удивление', color: '#49B34D', labelColor: '#78C77B', image: 'images/cards/surprise.jpg' },
+    { id: 'remorse',    word: 'Раскаяние', color: '#CFE6FA', labelColor: '#ACBAE3', image: 'images/cards/remorse.jpg' },
+    { id: 'amazement',  word: 'Изумление', color: '#44BA4F', labelColor: '#75CF8B', image: 'images/cards/amazement.jpg' },
+    { id: 'acceptance', word: 'Принятие',  color: '#D4E201', labelColor: '#E2ED48', image: 'images/cards/acceptance.jpg' }
   ];
 
   /* ---------- Встроенная SVG-иллюстрация ---------- */

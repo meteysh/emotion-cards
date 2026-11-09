@@ -63,6 +63,7 @@
     el.dataset.id = card.id;
     el.dataset.where = where;
     el.style.setProperty('--card-bg', card.color);
+    if (card.labelColor) el.style.setProperty('--card-label', card.labelColor);
     el.setAttribute('role', 'listitem');
     el.tabIndex = 0;
 
@@ -437,7 +438,7 @@
     cards = list;
     cards.forEach(function (c) {
       byId[c.id] = c;
-      imageUrls[c.id] = URL.createObjectURL(c.image);
+      imageUrls[c.id] = c.image ? URL.createObjectURL(c.image) : c.imageSrc;
     });
     return Promise.all([DB.getState('board'), DB.listSaves()]);
   }).then(function (res) {

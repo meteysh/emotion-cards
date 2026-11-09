@@ -73,57 +73,64 @@
   /* ---------- Карточки ---------- */
 
   function sourceSignature(card) {
-    return JSON.stringify([card.word, card.color, card.image || null, card.face || null]);
+    return JSON.stringify([card.word, card.color, card.labelColor || null, card.image || null, card.face || null]);
   }
 
+  // Картинка карточки как Blob. Если файл не удалось прочитать (например, страница открыта
+  // как file://, где fetch запрещён) — возвращает null, и приложение покажет картинку по ссылке.
   function loadImageBlob(card) {
-    var svgBlob = function () {
-      return new Blob([window.EmotionCards.makeSvg(card)], { type: 'image/svg+xml' });
-    };
-    if (!card.image) return Promise.resolve(svgBlob());
+    if (!card.image) {
+      return Promise.resolve(new Blob([window.EmotionCards.makeSvg(card)], { type: 'image/svg+xml' }));
+    }
     return fetch(card.image)
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.blob(); })
-      .catch(function () { return svgBlob(); }); // file:// или файла нет — встроенная картинка
+      .catch(function () { return null; });
   }
 
   /**
-   * Синхронизирует карточки из cards-data.js с базой:
-   * добавляет новые, обновляет изменённые (картинка перегенерируется только при изменении карточки).
+   * Синхронизирует карточки из cards-data.js с базой: добавляет новые, обновляет изменённые,
+   * удаляет те, которых больше нет в наборе. Картинки хранятся в базе как Blob.
    */
   function syncCards(defs) {
+    var known = {};
+    defs.forEach(function (d) { known[d.id] = true; });
+
     return getAll('cards').then(function (existing) {
       var byId = {};
       existing.forEach(function (c) { byId[c.id] = c; });
+      var stale = existing.filter(function (c) { return !known[c.id]; }).map(function (c) { return c.id; });
 
       var jobs = defs.map(function (def, index) {
         var cur = byId[def.id];
         var sig = sourceSignature(def);
-        if (cur && cur.signature === sig && cur.order === index) return null;
-        var blobP = (cur && cur.signature === sig) ? Promise.resolve(cur.image) : loadImageBlob(def);
+        var upToDate = cur && cur.signature === sig && cur.image;
+        if (upToDate && cur.order === index) return null;
+        var blobP = upToDate ? Promise.resolve(cur.image) : loadImageBlob(def);
         return blobP.then(function (blob) {
           return {
             id: def.id,
             word: def.word,
             color: def.color,
+            labelColor: def.labelColor || null,
             order: index,
-            image: blob,
+            image: blob,                 // null — не удалось сохранить, будет повторная попытка
+            imageSrc: def.image || null, // запасной вариант: прямая ссылка на файл
             signature: sig
           };
         });
       }).filter(Boolean);
 
-      return Promise.all(jobs);
-    }).then(function (toPut) {
-      if (!toPut.length) return;
-      return store('cards', 'readwrite').then(function (s) {
-        toPut.forEach(function (c) { s.os.put(c); });
-        return txDone(s.tx);
+      return Promise.all(jobs).then(function (toPut) {
+        if (!toPut.length && !stale.length) return;
+        return store('cards', 'readwrite').then(function (s) {
+          toPut.forEach(function (c) { s.os.put(c); });
+          stale.forEach(function (id) { s.os.delete(id); });
+          return txDone(s.tx);
+        });
       });
     }).then(function () {
       return getAll('cards');
     }).then(function (all) {
-      var known = {};
-      defs.forEach(function (d) { known[d.id] = true; });
       return all.filter(function (c) { return known[c.id]; })
                 .sort(function (a, b) { return a.order - b.order; });
     });
