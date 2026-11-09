@@ -75,7 +75,8 @@
       '</g></svg>';
   }
 
-  window.EmotionCards = {
+  // self — это window на странице и глобальный объект в service worker (sw.js тоже читает этот файл).
+  self.EmotionCards = {
     CARDS: CARDS,
     makeSvg: makeSvg
   };

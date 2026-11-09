@@ -2,6 +2,8 @@
   'use strict';
 
   var DB = window.EmotionDB;
+  // Метка версии из index.html (app.js?v=N) — по ней же версионируется офлайн-кэш.
+  var APP_VERSION = new URL(document.currentScript.src).searchParams.get('v') || '0';
 
   var deckEl = document.getElementById('deck');
   var boardEl = document.getElementById('board');
@@ -431,6 +433,28 @@
   document.getElementById('btn-reset').addEventListener('click', reset);
   document.getElementById('btn-csv').addEventListener('click', exportCsv);
   document.getElementById('btn-json').addEventListener('click', exportJson);
+
+  /* ---------- Офлайн-режим ---------- */
+
+  var netBadge = document.getElementById('net-status');
+  function updateNetStatus() { netBadge.hidden = navigator.onLine; }
+  window.addEventListener('online', updateNetStatus);
+  window.addEventListener('offline', updateNetStatus);
+  updateNetStatus();
+
+  // Service worker работает только по http(s) — при открытии файла (file://) просто пропускаем.
+  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+    window.addEventListener('load', function () {
+      var firstInstall = !navigator.serviceWorker.controller;
+      navigator.serviceWorker.register('sw.js?v=' + APP_VERSION).then(function (reg) {
+        var sw = reg.installing || reg.waiting;
+        if (!sw || !firstInstall) return;
+        sw.addEventListener('statechange', function () {
+          if (sw.state === 'activated') toast('Приложение сохранено и работает без интернета');
+        });
+      }).catch(function (e) { console.warn('Service worker не зарегистрирован:', e); });
+    });
+  }
 
   /* ---------- Старт ---------- */
 

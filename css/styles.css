@@ -56,6 +56,20 @@ h2 { font-size: 1rem; }
 
 /* ---------- Шапка ---------- */
 
+.net-badge {
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #6d655e;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: .03em;
+}
+.net-badge[hidden] { display: none; }
+
 .topbar {
   flex: none;
   display: flex;
