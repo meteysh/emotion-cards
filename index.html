@@ -7,8 +7,8 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <title>Карточки эмоций</title>
-  <link rel="stylesheet" href="css/styles.css?v=8">
-  <script src="js/layout.js?v=8"></script>
+  <link rel="stylesheet" href="css/styles.css?v=9">
+  <script src="js/layout.js?v=9"></script>
 </head>
 <body>
   <div class="app">
@@ -59,11 +59,26 @@
     <ol id="history" class="history" reversed></ol>
   </section>
 
+  <!-- Окно сохранения: выбранные карточки + комментарий о событиях -->
+  <dialog id="save-dialog" class="dialog" aria-labelledby="save-dialog-title">
+    <form id="save-form" class="dialog-body">
+      <h2 id="save-dialog-title">Сохранить раскладку</h2>
+      <div id="save-chips" class="chips"></div>
+      <label class="dialog-label" for="save-comment">Какие события произошли?</label>
+      <textarea id="save-comment" rows="5" maxlength="5000"
+        placeholder="Что случилось перед этим состоянием: ситуации, разговоры, мысли… Можно оставить пустым."></textarea>
+      <div class="dialog-actions">
+        <button id="save-cancel" class="btn" type="button">Отмена</button>
+        <button id="save-confirm" class="btn primary" type="submit">Сохранить</button>
+      </div>
+    </form>
+  </dialog>
+
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-  <script src="js/cards-data.js?v=8"></script>
-  <script src="js/db.js?v=8"></script>
-  <script src="js/drag.js?v=8"></script>
-  <script src="js/app.js?v=8"></script>
+  <script src="js/cards-data.js?v=9"></script>
+  <script src="js/db.js?v=9"></script>
+  <script src="js/drag.js?v=9"></script>
+  <script src="js/app.js?v=9"></script>
 </body>
 </html>

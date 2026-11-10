@@ -165,6 +165,14 @@
       load.addEventListener('click', function () { loadSave(s); });
       head.appendChild(load);
 
+      var note = document.createElement('button');
+      note.type = 'button';
+      note.className = 'btn small ghost';
+      note.textContent = s.comment ? 'Комментарий' : '+ Комментарий';
+      note.title = 'Изменить комментарий о событиях';
+      note.addEventListener('click', function () { openSaveDialog(s); });
+      head.appendChild(note);
+
       var del = document.createElement('button');
       del.type = 'button';
       del.className = 'btn small ghost';
@@ -184,6 +192,12 @@
         chips.appendChild(chip);
       });
       li.appendChild(chips);
+      if (s.comment) {
+        var comment = document.createElement('p');
+        comment.className = 'history-comment';
+        comment.textContent = s.comment;
+        li.appendChild(comment);
+      }
       historyEl.appendChild(li);
     });
   }
@@ -371,12 +385,83 @@
 
   /* ---------- Кнопки ---------- */
 
-  function save() {
+  /* ---------- Окно сохранения с комментарием ---------- */
+
+  var dialogEl = document.getElementById('save-dialog');
+  var dialogTitle = document.getElementById('save-dialog-title');
+  var dialogChips = document.getElementById('save-chips');
+  var commentEl = document.getElementById('save-comment');
+  var confirmBtn = document.getElementById('save-confirm');
+  var editing = null;        // сохранение, у которого правим комментарий (null — новое сохранение)
+  var draftComment = '';     // текст нового комментария, если окно закрыли «Отменой»
+
+  function fillChips(list) {
+    dialogChips.replaceChildren();
+    list.forEach(function (c, i) {
+      var chip = document.createElement('span');
+      chip.className = 'chip';
+      chip.style.setProperty('--card-bg', c.color);
+      chip.textContent = (i + 1) + '. ' + c.word;
+      dialogChips.appendChild(chip);
+    });
+  }
+
+  // record — сохранение для правки комментария; без него — новое сохранение текущей раскладки
+  function openSaveDialog(record) {
+    if (!record && !board.length) { toast('Сначала выберите хотя бы одну карточку', true); return; }
+    editing = record || null;
+    if (editing) {
+      var d = new Date(editing.savedAt);
+      dialogTitle.textContent = 'Комментарий к сохранению ' + formatDate(d) + ' ' + formatTime(d);
+      fillChips(editing.cards);
+      commentEl.value = editing.comment || '';
+      confirmBtn.textContent = 'Сохранить комментарий';
+    } else {
+      dialogTitle.textContent = 'Сохранить раскладку';
+      fillChips(board.map(function (id) { return byId[id]; }));
+      commentEl.value = draftComment;
+      confirmBtn.textContent = 'Сохранить';
+    }
+    if (typeof dialogEl.showModal === 'function') dialogEl.showModal();
+    else dialogEl.setAttribute('open', '');
+    commentEl.focus();
+  }
+
+  function closeSaveDialog() {
+    if (!editing) draftComment = commentEl.value;
+    if (typeof dialogEl.close === 'function') dialogEl.close();
+    else dialogEl.removeAttribute('open');
+  }
+
+  document.getElementById('save-cancel').addEventListener('click', closeSaveDialog);
+  dialogEl.addEventListener('cancel', function (e) { e.preventDefault(); closeSaveDialog(); }); // Esc
+  dialogEl.addEventListener('click', function (e) { if (e.target === dialogEl) closeSaveDialog(); }); // клик мимо окна
+  document.getElementById('save-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var text = commentEl.value.trim();
+    if (editing) updateComment(editing, text); else save(text);
+  });
+
+  function updateComment(record, text) {
+    var updated = Object.assign({}, record, { comment: text });
+    DB.updateSave(updated).then(function () {
+      saves = saves.map(function (s) { return s.id === updated.id ? updated : s; });
+      renderHistory();
+      closeSaveDialog();
+      toast('Комментарий сохранён');
+    }).catch(function (e) {
+      console.error(e);
+      toast('Не удалось сохранить комментарий: ' + (e && e.message || e), true);
+    });
+  }
+
+  function save(comment) {
     if (!board.length) { toast('Сначала выберите хотя бы одну карточку', true); return; }
     var now = new Date();
     var record = {
       savedAt: now.toISOString(),
       timezoneOffsetMin: -now.getTimezoneOffset(),
+      comment: comment || '',
       cards: board.map(function (id, i) {
         var c = byId[id];
         return { position: i + 1, id: c.id, word: c.word, color: c.color };
@@ -386,6 +471,9 @@
     DB.addSave(record).then(function (id) {
       record.id = id;
       saves.push(record);
+      draftComment = '';
+      commentEl.value = '';
+      closeSaveDialog();
       renderHistory();
       updateStorageInfo();
       toast('Сохранено: ' + formatDate(now) + ' ' + formatTime(now));
@@ -426,11 +514,11 @@
   function exportCsv() {
     if (!saves.length) { toast('Нет сохранений для экспорта', true); return; }
     var SEP = ';'; // так файл корректно открывается в Excel с русской локалью
-    var rows = [['save_id', 'saved_at_iso', 'date', 'time', 'cards_total', 'position', 'card_id', 'emotion', 'color']];
+    var rows = [['save_id', 'saved_at_iso', 'date', 'time', 'cards_total', 'position', 'card_id', 'emotion', 'color', 'comment']];
     saves.forEach(function (s) {
       var d = new Date(s.savedAt);
       s.cards.forEach(function (c) {
-        rows.push([s.id, s.savedAt, formatDate(d), formatTime(d), s.cards.length, c.position, c.id, c.word, c.color]);
+        rows.push([s.id, s.savedAt, formatDate(d), formatTime(d), s.cards.length, c.position, c.id, c.word, c.color, s.comment || '']);
       });
     });
     var csv = rows.map(function (r) { return r.map(csvCell).join(SEP); }).join('\r\n');
@@ -444,7 +532,7 @@
     download('emotion-cards-' + formatDate(new Date()) + '.json', JSON.stringify(data, null, 2), 'application/json');
   }
 
-  document.getElementById('btn-save').addEventListener('click', save);
+  document.getElementById('btn-save').addEventListener('click', function () { openSaveDialog(); });
   document.getElementById('btn-reset').addEventListener('click', reset);
   document.getElementById('btn-csv').addEventListener('click', exportCsv);
   document.getElementById('btn-json').addEventListener('click', exportJson);

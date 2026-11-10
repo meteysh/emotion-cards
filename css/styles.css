@@ -390,11 +390,57 @@ body.dragging-active { overflow: hidden; }
 .chip {
   --card-bg: #ddd;
   background: var(--card-bg);
+  background: color-mix(in srgb, var(--card-bg) 55%, #fff); /* светлее — тёмный текст читается на любом цвете */
   color: #2b2622;
   border-radius: 999px;
   padding: 3px 10px;
   font-size: 0.78rem;
   font-weight: 500;
+}
+
+/* ---------- Окно сохранения ---------- */
+
+.dialog {
+  width: min(520px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  margin: max(16px, 10vh) auto auto;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  color: var(--text);
+  box-shadow: 0 20px 50px rgba(0,0,0,.25);
+}
+.dialog::backdrop { background: rgba(20, 16, 12, .45); }
+.dialog-body { display: flex; flex-direction: column; gap: 12px; padding: 18px; }
+.dialog-body h2 { font-size: 1.05rem; }
+.dialog-label { font-weight: 600; font-size: 0.92rem; }
+.dialog textarea {
+  font: inherit;
+  font-size: 16px;            /* не меньше 16px — иначе iOS увеличивает страницу при вводе */
+  line-height: 1.4;
+  width: 100%;
+  min-height: 110px;
+  resize: vertical;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--text);
+}
+.dialog textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.dialog-actions { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+
+.history-comment {
+  margin: 8px 0 0;
+  padding: 8px 10px;
+  border-left: 3px solid var(--line);
+  background: var(--bg);
+  border-radius: 0 8px 8px 0;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 /* ---------- Уведомление ---------- */

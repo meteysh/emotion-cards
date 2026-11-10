@@ -4,7 +4,7 @@
  * Сторы:
  *   cards  — карточки вместе с картинками (Blob). Картинки хранятся в базе,
  *            поэтому объём может вырасти до сотен мегабайт — для IndexedDB это норма.
- *   saves  — сохранения: { id, savedAt (ISO), savedAtLocal, cards: [{position, id, word, color}] }
+ *   saves  — сохранения: { id, savedAt (ISO), timezoneOffsetMin, comment, cards: [{position, id, word, color}] }
  *   state  — служебное: текущая (несохранённая) раскладка, чтобы не терять её при перезагрузке.
  */
 (function () {
@@ -151,6 +151,14 @@
     });
   }
 
+  // Обновить существующее сохранение (например, комментарий к нему).
+  function updateSave(record) {
+    return store('saves', 'readwrite').then(function (s) {
+      s.os.put(record);
+      return txDone(s.tx);
+    });
+  }
+
   function deleteSave(id) {
     return store('saves', 'readwrite').then(function (s) {
       s.os.delete(id);
@@ -196,6 +204,7 @@
     syncCards: syncCards,
     addSave: addSave,
     listSaves: listSaves,
+    updateSave: updateSave,
     deleteSave: deleteSave,
     getState: getState,
     setState: setState,
